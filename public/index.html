@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Video Downloader - Tải Video Miễn Phí</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ee4d2d;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 5px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #0d47a1;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #ee4d2d;
+            box-shadow: 0 0 0 4px rgba(238,77,45,0.1);
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .checkbox-label input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        .btn-download {
+            background: #ee4d2d;
+            color: white;
+        }
+        .btn-download:hover:not(:disabled) {
+            background: #d73211;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(238,77,45,0.4);
+        }
+        .btn-download:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-clear {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ee4d2d;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            display: none;
+        }
+        .result.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+        }
+        .result.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 2px solid #dc3545;
+        }
+        .result-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #155724;
+        }
+        .result.error .result-title {
+            color: #721c24;
+        }
+        .video-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .video-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .video-number {
+            background: #ee4d2d;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .quality-badge {
+            font-weight: 700;
+            font-size: 15px;
+            color: #333;
+        }
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .action-btn {
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-copy {
+            background: #667eea;
+            color: white;
+        }
+        .btn-copy:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-dl {
+            background: #28a745;
+            color: white;
+        }
+        .btn-dl:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 16px 30px;
+            border-radius: 30px;
+            font-size: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            z-index: 1000;
+            display: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            font-size: 14px;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 25px; }
+            h1 { font-size: 24px; }
+            .action-btns { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ Shopee Video Downloader</h1>
+        <div class="subtitle">Tải video Shopee miễn phí - Không quảng cáo - Không giới hạn</div>
+        
+        <div class="info">
+            <strong>💡 Hướng dẫn sử dụng:</strong><br><br>
+            1️⃣ Copy link video Shopee (từ app hoặc web)<br>
+            2️⃣ Dán vào ô bên dưới<br>
+            3️⃣ Nhấn "Tải Video" và chờ vài giây<br>
+            4️⃣ Chọn chất lượng HD/SD và tải về<br><br>
+            <small style="color:#1565c0;">📌 Ví dụ link: https://vn.shp.ee/qr0w7qm</small>
+        </div>
+
+        <input 
+            type="text" 
+            id="videoUrl" 
+            placeholder="Dán link video Shopee tại đây..."
+            autocomplete="off"
+        >
+
+        <label class="checkbox-label">
+            <input type="checkbox" id="autoDownload" checked>
+            <span>⚡ Tự động tải video khi hoàn tất</span>
+        </label>
+
+        <button class="btn-download" onclick="downloadVideo()">⬇️ Tải Video</button>
+        <button class="btn-clear" onclick="clearAll()">🗑️ Xóa</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Đang xử lý video, vui lòng đợi...</div>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <div class="footer">
+        ❤️ Free Forever | No Ads | Unlimited Downloads
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        async function downloadVideo() {
+            const urlInput = document.getElementById('videoUrl');
+            const url = urlInput.value.trim();
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const downloadBtn = document.querySelector('.btn-download');
+            const autoDownload = document.getElementById('autoDownload').checked;
+
+            if (!url) {
+                showResult('⚠️ Vui lòng nhập link video Shopee!', 'error');
+                return;
+            }
+
+            if (!url.includes('shopee') && !url.includes('shp.ee')) {
+                showResult('❌ Link không hợp lệ! Vui lòng nhập link video Shopee.', 'error');
+                return;
+            }
+
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            downloadBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                if (data.error === false && data.download_link && data.download_link.length > 0) {
+                    displayVideoLinks(data.download_link);
+                    if (autoDownload) {
+                        setTimeout(() => autoDownloadVideo(data.download_link[0]), 600);
+                    }
+                } else {
+                    showResult('❌ ' + (data.message || 'Không thể tải video. Vui lòng thử lại!'), 'error');
+                }
+            } catch (error) {
+                showResult('❌ Lỗi kết nối: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+                downloadBtn.disabled = false;
+            }
+        }
+
+        function autoDownloadVideo(videoUrl) {
+            const a = document.createElement('a');
+            a.href = videoUrl;
+            a.download = 'shopee_video_' + Date.now() + '.mp4';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('✅ Video đang tải xuống!');
+        }
+
+        function displayVideoLinks(downloadLinks) {
+            const result = document.getElementById('result');
+            result.className = 'result success';
+            
+            let html = '<div class="result-title">✅ Lấy link thành công! Tải về ngay:</div>';
+            
+            downloadLinks.forEach((videoUrl, index) => {
+                const quality = index === 0 ? '🎬 HD - Chất lượng cao' : '📹 SD - Chất lượng thường';
+                html += `
+                    <div class="video-item">
+                        <div class="video-header">
+                            <div class="video-number">${index + 1}</div>
+                            <div class="quality-badge">${quality}</div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="action-btn btn-copy" onclick="copyLink('${videoUrl}')">
+                                📋 Copy Link
+                            </button>
+                            <button class="action-btn btn-dl" onclick="manualDownload('${videoUrl}')">
+                                💾 Tải Ngay
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            result.innerHTML = html;
+            result.style.display = 'block';
+        }
+
+        function manualDownload(videoUrl) {
+            const a = document.createElement('a');
+            a.href = videoUrl;
+            a.download = 'shopee_video.mp4';
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('✅ Đang tải video...');
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.className = `result ${type}`;
+            result.innerHTML = `<div class="result-title">${message}</div>`;
+            result.style.display = 'block';
+        }
+
+        async function copyLink(url) {
+            try {
+                await navigator.clipboard.writeText(url);
+                showToast('✅ Đã copy link vào clipboard!');
+            } catch (err) {
+                showToast('❌ Không thể copy!');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function clearAll() {
+            document.getElementById('videoUrl').value = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        document.getElementById('videoUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') downloadVideo();
+        });
+    </script>
+</body>
+</html>
